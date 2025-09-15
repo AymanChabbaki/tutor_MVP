@@ -1,0 +1,43 @@
+{
+  "common": {
+    "loading": "جاري التحميل...",
+    "error": "خطأ",
+    "submit": "إرسال",
+    "cancel": "إلغاء",
+    "retry": "إعادة المحاولة"
+  },
+  "navigation": {
+    "home": "الرئيسية",
+    "features": "الميزات",
+    "about": "حول",
+    "profile": "الملف الشخصي"
+  },
+  "features": {
+    "summarize": {
+      "title": "تلخيص",
+      "description": "احصل على ملخص مقتضب لمحتواك",
+      "button": "إنشاء ملخص",
+      "placeholder": "الصق محتوى الدورة هنا..."
+    },
+    "explain": {
+      "title": "شرح",
+      "description": "احصل على شروحات مفصلة بالعربية والإنجليزية",
+      "button": "إنشاء شرح"
+    },
+    "exercises": {
+      "title": "إنشاء تمارين",
+      "description": "أنشئ أسئلة تدريبية مع الإجابات",
+      "button": "إنشاء تمارين"
+    }
+  },
+  "results": {
+    "summary": "الملخص",
+    "arabicExplanation": "الشرح بالعربية",
+    "englishExplanation": "الشرح بالإنجليزية",
+    "exercises": "التمارين التدريبية",
+    "question": "السؤال",
+    "answer": "الإجابة"
+  },
+  "sessionHistory": "سجل الجلسات",
+  "sessionHistoryPlaceholder": "سيظهر سجل الجلسات هنا (يتطلب الاتصال بالخادم)"
+}

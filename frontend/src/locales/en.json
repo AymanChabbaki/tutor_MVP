@@ -1,0 +1,43 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "retry": "Try Again"
+  },
+  "navigation": {
+    "home": "Home",
+    "features": "Features",
+    "about": "About",
+    "profile": "Profile"
+  },
+  "features": {
+    "summarize": {
+      "title": "Summarize",
+      "description": "Get a concise summary of your content",
+      "button": "Generate Summary",
+      "placeholder": "Paste your course content here..."
+    },
+    "explain": {
+      "title": "Explain",
+      "description": "Get detailed explanations in Arabic and English",
+      "button": "Generate Explanation"
+    },
+    "exercises": {
+      "title": "Generate Exercises",
+      "description": "Create practice questions with answers",
+      "button": "Generate Exercises"
+    }
+  },
+  "results": {
+    "summary": "Summary",
+    "arabicExplanation": "Arabic Explanation",
+    "englishExplanation": "English Explanation",
+    "exercises": "Practice Exercises",
+    "question": "Question",
+    "answer": "Answer"
+  },
+  "sessionHistory": "Session History",
+  "sessionHistoryPlaceholder": "Session history will appear here (requires backend)"
+}
