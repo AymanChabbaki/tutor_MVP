@@ -36,6 +36,10 @@ def validate_json_input(required_fields):
     def decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
+            # Handle OPTIONS requests for CORS
+            if request.method == 'OPTIONS':
+                return '', 200
+                
             if not request.is_json:
                 return jsonify({
                     'error': 'Content-Type must be application/json'
@@ -71,7 +75,7 @@ def health_check():
         'version': '1.0.0'
     }), 200
 
-@api_bp.route('/summarize', methods=['POST'])
+@api_bp.route('/summarize', methods=['POST', 'OPTIONS'])
 @validate_json_input(['text'])
 @async_route
 async def summarize_content():
@@ -81,7 +85,8 @@ async def summarize_content():
     Expected input:
     {
         "text": "copied course content or headings",
-        "user_id": 1  // optional
+        "user_id": 1,  // optional
+        "language_preference": "arabic" | "english"  // optional, defaults to "english"
     }
     
     Returns:
@@ -93,8 +98,9 @@ async def summarize_content():
         data = request.get_json()
         input_text = data['text'].strip()
         user_id = data.get('user_id')
+        language_preference = data.get('language_preference', 'english').lower()
         
-        logger.info(f"Summarizing content for user {user_id}: {len(input_text)} characters")
+        logger.info(f"Summarizing content for user {user_id} in {language_preference}: {len(input_text)} characters")
         
         # Generate summary using Gemini AI
         summary = await gemini_service.summarize_content(input_text)
@@ -136,37 +142,64 @@ async def summarize_content():
             'message': str(e)
         }), 500
 
-@api_bp.route('/explain', methods=['POST'])
+@api_bp.route('/explain', methods=['POST', 'OPTIONS'])
 @validate_json_input(['text'])
 @async_route
 async def explain_content():
     """
-    Explain course content in both Arabic and English.
+    Explain course content based on language preference.
     
     Expected input:
     {
         "text": "copied course content or headings",
-        "user_id": 1  // optional
+        "user_id": 1,  // optional
+        "language_preference": "arabic" | "english"  // optional, defaults to "english"
     }
     
     Returns:
     {
-        "arabic_explanation": "...",
-        "english_explanation": "..."
+        "explanation": "explanation in the requested language"
     }
     """
     try:
         data = request.get_json()
         input_text = data['text'].strip()
         user_id = data.get('user_id')
+        language_preference = data.get('language_preference', 'english').lower()
         
-        logger.info(f"Explaining content for user {user_id}: {len(input_text)} characters")
+        logger.info(f"Explaining content for user {user_id} in {language_preference}: {len(input_text)} characters")
         
-        # Generate explanations using Gemini AI
+        # Generate explanation using Gemini AI 
         arabic_explanation, english_explanation = await gemini_service.explain_content(input_text)
         
-        # Combine explanations for database storage
-        combined_explanation = f"Arabic: {arabic_explanation}\n\nEnglish: {english_explanation}"
+        # Select the appropriate explanation based on language preference
+        if language_preference == 'arabic':
+            explanation = arabic_explanation
+            response = {
+                'explanation': explanation,
+                'language': language_preference
+            }
+        elif language_preference == 'english':
+            explanation = english_explanation
+            response = {
+                'explanation': explanation,
+                'language': language_preference
+            }
+        elif language_preference == 'both':
+            # Return both explanations
+            response = {
+                'arabic_explanation': arabic_explanation,
+                'english_explanation': english_explanation,
+                'language': language_preference
+            }
+            explanation = f"Arabic: {arabic_explanation}\n\nEnglish: {english_explanation}"
+        else:
+            # Default to English if invalid preference
+            explanation = english_explanation
+            response = {
+                'explanation': explanation,
+                'language': 'english'
+            }
         
         # Store in database if user_id is provided
         session_id = None
@@ -175,18 +208,13 @@ async def explain_content():
                 session = await db_service.create_session(
                     user_id=user_id,
                     input_text=input_text,
-                    output_explanation=combined_explanation
+                    output_explanation=explanation
                 )
                 session_id = session['id']
                 logger.info(f"Stored explanation session {session_id} for user {user_id}")
             except Exception as db_error:
                 logger.warning(f"Failed to store session in database: {db_error}")
                 # Continue even if database storage fails
-        
-        response = {
-            'arabic_explanation': arabic_explanation,
-            'english_explanation': english_explanation
-        }
         
         if session_id:
             response['session_id'] = session_id
@@ -206,7 +234,7 @@ async def explain_content():
             'message': str(e)
         }), 500
 
-@api_bp.route('/generate_exercises', methods=['POST'])
+@api_bp.route('/generate_exercises', methods=['POST', 'OPTIONS'])
 @validate_json_input(['text'])
 @async_route
 async def generate_exercises():

@@ -1,169 +1,193 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import './styles/components.css';
-import TextInputArea from './components/TextInputArea';
-import FeatureSelector from './components/FeatureSelector';
-import LoadingSpinner from './components/LoadingSpinner';
-import SummaryResult from './components/SummaryResult';
-import ExplanationResult from './components/ExplanationResult';
-import ExercisesResult from './components/ExercisesResult';
-import ErrorDisplay from './components/ErrorDisplay';
-import { summarizeContent, explainContent, generateExercises } from './services/api.jsx';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import Sidebar from './components/Sidebar';
+import HomePage from './pages/HomePage';
+import ChatPage from './pages/ChatPage';
+import ResultsPage from './pages/ResultsPage';
+import Button from './components/Button';
+import { testConnection } from './services/api';
 
-export default function App() {
-  const { t, i18n } = useTranslation();
-  const [text, setText] = useState('');
-  const [feature, setFeature] = useState('summarize');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [result, setResult] = useState(null);
+function App() {
+  // State management
+  const [history, setHistory] = useState([]);
+  const [results, setResults] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
-  const sidebarRef = useRef();
+  const [apiConnected, setApiConnected] = useState(null);
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState(null);
 
-  // Close sidebar when clicking outside
+  // Check API connection on startup
   useEffect(() => {
-    if (!sidebarOpen) return;
-    const handleClick = (e) => {
-      if (
-        sidebarRef.current &&
-        !sidebarRef.current.contains(e.target) &&
-        !e.target.classList.contains('sidebar-modern-toggle')
-      ) {
-        setSidebarOpen(false);
+    const checkConnection = async () => {
+      try {
+        await testConnection();
+        setApiConnected(true);
+      } catch (error) {
+        console.error('API connection failed:', error);
+        setApiConnected(false);
       }
     };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [sidebarOpen]);
 
-  useEffect(() => {
-    if (darkMode) {
-      document.body.classList.add('dark');
-      document.querySelector('.app-bg')?.classList.add('dark');
-    } else {
-      document.body.classList.remove('dark');
-      document.querySelector('.app-bg')?.classList.remove('dark');
-    }
-  }, [darkMode]);
+    checkConnection();
+  }, []);
 
-  const handleSubmit = async () => {
-    setError(null);
-    setResult(null);
-    if (!text.trim()) { setError('Input is empty'); return; }
-    setLoading(true);
-    try {
-      if (feature === 'summarize') {
-        const res = await summarizeContent(text);
-        setResult({ type: 'summary', payload: res });
-      } else if (feature === 'explain') {
-        const res = await explainContent(text);
-        setResult({ type: 'explain', payload: res });
-      } else {
-        const res = await generateExercises(text);
-        setResult({ type: 'exercises', payload: res });
-      }
-    } catch (err) {
-      setError(err.message || 'Unknown error');
-    } finally {
-      setLoading(false);
-    }
+  // Event handlers
+  const addToHistory = (type, originalText, content, language) => {
+    const newItem = {
+      id: Date.now().toString(),
+      type,
+      originalText,
+      content,
+      language,
+      timestamp: new Date().toISOString()
+    };
+    
+    setHistory(prev => [newItem, ...prev]); // Add to beginning of array
+    setSidebarOpen(true); // Auto-open sidebar when content is generated
   };
 
-  const toggleLang = () => {
-    const next = i18n.language === 'en' ? 'ar' : 'en';
-    i18n.changeLanguage(next);
-    document.documentElement.dir = next === 'ar' ? 'rtl' : 'ltr';
+  const handleSummaryGenerated = (originalText, summary, language) => {
+    addToHistory('summary', originalText, summary, language);
+  };
+
+  const handleExplanationGenerated = (originalText, explanation, language) => {
+    addToHistory('explanation', originalText, explanation, language);
+  };
+
+  const handleExercisesGenerated = (originalText, exercises, language) => {
+    addToHistory('exercises', originalText, exercises, language);
+    setResults(exercises);
+  };
+
+  const handleResultsGenerated = (newResults) => {
+    setResults(newResults);
+  };
+
+  const handleHistoryItemClick = (item) => {
+    setSelectedHistoryItem(item);
+    setSidebarOpen(false); // Close sidebar when item is clicked
+  };
+
+  const clearHistory = () => {
+    setHistory([]);
+    setSidebarOpen(false);
+    setSelectedHistoryItem(null);
+  };
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
   };
 
   return (
-    <div className={`app-bg${darkMode ? ' dark' : ''}`}>
-      {/* Animated background */}
-      <div className="animated-bg">
-        <div className="smoke smoke1"></div>
-        <div className="smoke smoke2"></div>
-        <div className="smoke smoke3"></div>
-      </div>
-      {/* Sidebar */}
-      <div
-        ref={sidebarRef}
-        className={`sidebar-modern ${sidebarOpen ? 'sidebar-modern--open' : ''}`}
-      >
-        <button
-          className="sidebar-modern-toggle"
-          onClick={() => setSidebarOpen((v) => !v)}
-          aria-label={sidebarOpen ? "Close session history" : "Open session history"}
-        >
-          <span className={`arrow-modern ${sidebarOpen ? 'arrow-modern--left' : 'arrow-modern--right'}`}></span>
-        </button>
-        <div className="sidebar-modern-content">
-          <h3>Session History</h3>
-          <p>Session history will appear here (requires backend)</p>
-        </div>
-      </div>
-      {/* Main content */}
-      <div
-        className={`main-content-modern ${sidebarOpen ? 'main-content-modern--sidebar-open' : ''}${darkMode ? ' dark' : ''}`}
-        style={{
-          minHeight: '70vh',
-          height: 'auto',
-          transition: 'margin-left 0.4s cubic-bezier(.4,0,.2,1), width 0.4s cubic-bezier(.4,0,.2,1)',
-          marginLeft: sidebarOpen ? 320 : 0,
-          width: sidebarOpen ? 'calc(100vw - 320px)' : '100vw',
-        }}
-      >
-        <main className={`container main-content-full main-content-padded-fix${darkMode ? ' dark' : ''}`}>
-          <header className={`header${darkMode ? ' dark' : ''}`}>
-            <div className="brand">AI Bootcamp Tutor</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <button onClick={toggleLang} className="btn">{i18n.language === 'en' ? 'AR' : 'EN'}</button>
-              <button
-                className={`btn-darkmode${darkMode ? ' active' : ''}`}
-                onClick={() => setDarkMode((v) => !v)}
-                aria-label="Toggle dark mode"
-              >
-                {darkMode ? '☀️ Light' : '🌙 Dark'}
-              </button>
-            </div>
-          </header>
-          <section className="main-section-full main-section-centered-fix">
-            <div className="main-col-full main-col-centered-fix">
-              <TextInputArea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder={t('features.summarize.placeholder')}
-              />
+    <Router>
+      <div className="app-container">
+        {/* Header */}
+        <Header />
 
-              <FeatureSelector selectedFeature={feature} onFeatureChange={setFeature} />
-
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem', width: '100%' }}>
-                <button onClick={handleSubmit} className="btn btn-primary" style={{ flex: 1 }}>
-                  {feature === 'summarize' ? t('features.summarize.button') :
-                   feature === 'explain' ? t('features.explain.button') :
-                   t('features.exercises.button')}
-                </button>
-                <button onClick={() => { setText(''); setResult(null); setError(null); }} className="btn btn-clear" style={{ flex: 1 }}>Clear</button>
+        {/* API Connection Status */}
+        {apiConnected === false && (
+          <div className="bg-red-50 border-l-4 border-red-400 p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <span className="text-red-400">⚠️</span>
               </div>
+              <div className="ml-3">
+                <p className="text-sm text-red-700">
+                  Unable to connect to the backend server. Please ensure the backend is running on http://localhost:5000
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
-              {loading && <LoadingSpinner message={t('common.loading')} />}
+        {/* Main Layout */}
+        <div className="main-layout">
+          {/* Mobile menu button */}
+          {history.length > 0 && (
+            <Button
+              onClick={toggleSidebar}
+              className="mobile-menu-btn lg:hidden"
+              variant="ghost"
+              size="small"
+              aria-label="Toggle history sidebar"
+            >
+              �
+            </Button>
+          )}
 
-              {error && <ErrorDisplay error={error} onRetry={handleSubmit} />}
-
-              {result && result.type === 'summary' && <SummaryResult summary={result.payload.summary || ''} />}
-
-              {result && result.type === 'explain' && (
-                <ExplanationResult
-                  arabicExplanation={result.payload.arabic_explanation}
-                  englishExplanation={result.payload.english_explanation}
+          {/* Sidebar */}
+          {history.length > 0 && (
+            <>
+              {/* Mobile overlay */}
+              {sidebarOpen && (
+                <div 
+                  className="sidebar-overlay"
+                  onClick={closeSidebar}
                 />
               )}
+              
+              {/* Sidebar component */}
+              <Sidebar
+                history={history}
+                isOpen={sidebarOpen}
+                onToggle={toggleSidebar}
+                onClearHistory={clearHistory}
+                onItemClick={handleHistoryItemClick}
+                className="custom-scrollbar"
+              />
+            </>
+          )}
 
-              {result && result.type === 'exercises' && <ExercisesResult exercises={result.payload.exercises || []} />}
-            </div>
-          </section>
-        </main>
+          {/* Main Content */}
+          <main className={`main-content ${history.length > 0 ? 'has-sidebar' : ''} min-h-content`}>
+            <Routes>
+              <Route 
+                path="/" 
+                element={
+                  <ChatPage
+                    onSummaryGenerated={handleSummaryGenerated}
+                    onExplanationGenerated={handleExplanationGenerated}
+                    onExercisesGenerated={handleExercisesGenerated}
+                    onResultsGenerated={handleResultsGenerated}
+                    setSidebarOpen={setSidebarOpen}
+                    selectedHistoryItem={selectedHistoryItem}
+                  />
+                } 
+              />
+              <Route 
+                path="/old-home" 
+                element={
+                  <HomePage
+                    onSummaryGenerated={handleSummaryGenerated}
+                    onExplanationGenerated={handleExplanationGenerated}
+                    onExercisesGenerated={handleExercisesGenerated}
+                    onResultsGenerated={handleResultsGenerated}
+                    setSidebarOpen={setSidebarOpen}
+                  />
+                } 
+              />
+              <Route 
+                path="/results" 
+                element={
+                  <ResultsPage 
+                    results={results}
+                  />
+                } 
+              />
+            </Routes>
+          </main>
+        </div>
+
+        {/* Footer */}
+        <Footer />
       </div>
-    </div>
+    </Router>
   );
 }
 
+export default App;

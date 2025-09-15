@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --primary-blue: #2563eb;
   --primary-light: #3b82f6;
@@ -24,4 +28,113 @@ body {
 }
 
 /* RTL helper for Arabic content */
-.rtl { direction: rtl; text-align: right; font-family: "Noto Sans Arabic", sans-serif; }
+.rtl { 
+  direction: rtl; 
+  text-align: right; 
+  font-family: "Noto Sans Arabic", Arial, sans-serif; 
+}
+
+@layer components {
+  /* Layout Components */
+  .app-container {
+    @apply min-h-screen flex flex-col;
+  }
+  
+  .main-layout {
+    @apply flex flex-1 relative;
+  }
+  
+  .main-content {
+    @apply flex-1 transition-all duration-300;
+  }
+  
+  .main-content.has-sidebar {
+    @apply lg:ml-80;
+  }
+  
+  /* Sidebar Styles */
+  .sidebar-overlay {
+    @apply fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden;
+  }
+  
+  /* Mobile Menu Button */
+  .mobile-menu-btn {
+    @apply lg:hidden fixed top-4 left-4 z-50 p-2 bg-white border border-gray-300 rounded-md shadow-sm;
+  }
+  
+  /* Card Components */
+  .result-card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-4;
+  }
+  
+  .exercise-card {
+    @apply bg-white rounded-lg border border-gray-200 p-4 space-y-3;
+  }
+  
+  /* Loading and Animation */
+  .loading-spinner {
+    @apply animate-spin h-8 w-8 text-blue-600;
+  }
+  
+  /* Custom Scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-gray-100;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gray-400 rounded-full;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500;
+  }
+}
+
+@layer utilities {
+  /* Animation Utilities */
+  .fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  /* Custom Height Utilities */
+  .h-sidebar {
+    height: calc(100vh - 64px);
+  }
+  
+  .min-h-content {
+    min-height: calc(100vh - 128px);
+  }
+}
+
+/* Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Responsive Design */
+@media (max-width: 1023px) {
+  .main-content.has-sidebar {
+    margin-left: 0;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .sidebar, .mobile-menu-btn, button, .no-print {
+    display: none !important;
+  }
+  .main-content { margin-left: 0 !important; }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .transition-all, .animate-spin {
+    animation: none !important;
+    transition: none !important;
+  }
+}
