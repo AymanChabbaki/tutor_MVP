@@ -103,7 +103,7 @@ async def summarize_content():
         logger.info(f"Summarizing content for user {user_id} in {language_preference}: {len(input_text)} characters")
         
         # Generate summary using Gemini AI
-        summary = await gemini_service.summarize_content(input_text)
+        summary = await gemini_service.summarize_content(input_text, language_preference)
         
         # Store in database if user_id is provided
         session_id = None
@@ -260,11 +260,12 @@ async def generate_exercises():
         data = request.get_json()
         input_text = data['text'].strip()
         user_id = data.get('user_id')
+        language_preference = data.get('language_preference', 'english').lower()
         
-        logger.info(f"Generating exercises for user {user_id}: {len(input_text)} characters")
+        logger.info(f"Generating exercises for user {user_id} in {language_preference}: {len(input_text)} characters")
         
         # Generate exercises using Gemini AI
-        exercises = await gemini_service.generate_exercises(input_text)
+        exercises = await gemini_service.generate_exercises(input_text, language_preference)
         
         # Store in database if user_id is provided
         session_id = None

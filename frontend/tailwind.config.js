@@ -9,6 +9,7 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
         arabic: ['Noto Sans Arabic', 'Arial', 'sans-serif'],
+        'Tajawal': ['Tajawal', 'Arabic Typesetting', 'Arial', 'sans-serif'],
       },
       colors: {
         primary: {

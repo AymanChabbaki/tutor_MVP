@@ -1,15 +1,17 @@
 import React from 'react';
+import { Globe } from 'lucide-react';
 
 const LanguageSelector = ({ language, onChange }) => {
   const languages = [
-    { value: 'english', label: 'English', flag: '🇺🇸' },
-    { value: 'arabic', label: 'العربية', flag: '🇸🇦' },
-    { value: 'both', label: 'Both / كلاهما', flag: '🌐' }
+    { value: 'english', label: 'English' },
+    { value: 'arabic', label: 'العربية' },
+    { value: 'both', label: 'Both / كلاهما' }
   ];
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-gray-700">
+      <label className="block text-sm font-medium text-gray-700 flex items-center gap-1">
+        <Globe size={14} />
         Language / اللغة
       </label>
       <div className="flex flex-wrap gap-2">
@@ -23,7 +25,6 @@ const LanguageSelector = ({ language, onChange }) => {
                 : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <span className="mr-1">{lang.flag}</span>
             {lang.label}
           </button>
         ))}
