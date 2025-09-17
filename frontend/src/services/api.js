@@ -1,21 +1,140 @@
 import axios from 'axios';
 
-// Get the API base URL from environment variables
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-// Create axios instance with default configuration
+// Create axios instance
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000, // 30 seconds timeout
 });
 
-// Request interceptor for logging
+// Add token to requests if available
 api.interceptors.request.use(
   (config) => {
-    console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Handle response errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token expired or invalid
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+// AI Services
+export const aiApi = {
+  summarize: async (text, languagePreference = 'english') => {
+    const response = await api.post('/summarize', {
+      text,
+      language_preference: languagePreference
+    });
+    return response.data;
+  },
+
+  explain: async (text, languagePreference = 'english') => {
+    const response = await api.post('/explain', {
+      text,
+      language_preference: languagePreference
+    });
+    return response.data;
+  },
+
+  generateExercises: async (text, languagePreference = 'english') => {
+    const response = await api.post('/generate_exercises', {
+      text,
+      language_preference: languagePreference
+    });
+    return response.data;
+  }
+};
+
+// Session Management
+export const sessionApi = {
+  getUserSessions: async (limit = 20, collectionId = null) => {
+    const params = { limit };
+    if (collectionId) params.collection_id = collectionId;
+    
+    const response = await api.get('/sessions', { params });
+    return response.data;
+  },
+
+  deleteSession: async (sessionId) => {
+    const response = await api.delete(`/sessions/${sessionId}`);
+    return response.data;
+  }
+};
+
+// Collections Management
+export const collectionsApi = {
+  getCollections: async () => {
+    const response = await api.get('/collections');
+    return response.data;
+  },
+
+  createCollection: async (name, description = '') => {
+    const response = await api.post('/collections', {
+      name,
+      description
+    });
+    return response.data;
+  },
+
+  updateCollection: async (id, name, description = '') => {
+    const response = await api.put(`/collections/${id}`, {
+      name,
+      description
+    });
+    return response.data;
+  },
+
+  deleteCollection: async (id) => {
+    const response = await api.delete(`/collections/${id}`);
+    return response.data;
+  },
+
+  addSessionToCollection: async (collectionId, sessionId) => {
+    const response = await api.post(`/collections/${collectionId}/sessions/${sessionId}`);
+    return response.data;
+  },
+
+  removeSessionFromCollection: async (collectionId, sessionId) => {
+    const response = await api.delete(`/collections/${collectionId}/sessions/${sessionId}`);
+    return response.data;
+  }
+};
+
+// Health Check
+export const healthApi = {
+  check: async () => {
+    const response = await api.get('/health');
+    return response.data;
+  }
+};
+
+// Request interceptor for adding auth token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    console.log('API Request:', config.method?.toUpperCase(), config.url);
     return config;
   },
   (error) => {
@@ -27,7 +146,7 @@ api.interceptors.request.use(
 // Response interceptor for error handling
 api.interceptors.response.use(
   (response) => {
-    console.log(`API Response: ${response.status} ${response.config.url}`);
+    console.log('API Response:', response.status, response.config.url);
     return response;
   },
   (error) => {
@@ -140,6 +259,52 @@ export const testConnection = async () => {
   } catch (error) {
     console.error('Health Check Error:', error);
     throw new Error('Unable to connect to the server. Please ensure the backend is running.');
+  }
+};
+
+// Export service aliases for ChatInterfaceV2 compatibility
+export const aiService = {
+  ...aiApi,
+  sendMessage: async (data) => {
+    // Legacy function for backward compatibility
+    const response = await api.post('/ai/message', data);
+    return response;
+  }
+};
+
+export const sessionService = {
+  ...sessionApi,
+  getSession: async (sessionId) => {
+    const response = await api.get(`/sessions/${sessionId}`);
+    return response;
+  },
+  createSession: async (sessionData) => {
+    const response = await api.post('/sessions', sessionData);
+    return response;
+  }
+};
+
+export const collectionService = {
+  ...collectionsApi,
+  getUserCollections: async () => {
+    const response = await api.get('/collections');
+    return response;
+  },
+  getCollection: async (collectionId) => {
+    const response = await api.get(`/collections/${collectionId}`);
+    return response;
+  },
+  getCollectionSessions: async (collectionId) => {
+    const response = await api.get(`/collections/${collectionId}/sessions`);
+    return response;
+  },
+  createCollection: async (collectionData) => {
+    const response = await api.post('/collections', collectionData);
+    return response;
+  },
+  deleteCollection: async (collectionId) => {
+    const response = await api.delete(`/collections/${collectionId}`);
+    return response;
   }
 };
 

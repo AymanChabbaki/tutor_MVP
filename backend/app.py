@@ -5,6 +5,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from config.settings import get_config
 from routes.api import api_bp
+from routes.auth_routes import auth_bp
 from db.database import db_service
 
 # Configure logging
@@ -26,11 +27,15 @@ def create_app(config_name=None):
     config = get_config()
     app.config.from_object(config)
     
-    # Enable CORS
-    CORS(app, origins=config.CORS_ORIGINS if hasattr(config, 'CORS_ORIGINS') else '*')
+    # Enable CORS with authentication support
+    CORS(app, 
+         origins=config.CORS_ORIGINS if hasattr(config, 'CORS_ORIGINS') else '*',
+         supports_credentials=True,
+         allow_headers=['Content-Type', 'Authorization'])
     
     # Register blueprints
     app.register_blueprint(api_bp, url_prefix='/api')
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
     
     # Global error handlers
     @app.errorhandler(404)
@@ -60,16 +65,30 @@ def create_app(config_name=None):
     @app.route('/')
     def index():
         return jsonify({
-            'service': 'AI Bootcamp Tutor MVP',
-            'version': '1.0.0',
+            'service': 'AI Bootcamp Tutor V2',
+            'version': '2.0.0',
             'status': 'running',
+            'features': [
+                'JWT Authentication',
+                'Session Management',
+                'Collections',
+                'Multi-language Support',
+                'Gemini AI Integration'
+            ],
             'endpoints': {
                 'health': '/api/health',
-                'summarize': '/api/summarize',
-                'explain': '/api/explain',
-                'generate_exercises': '/api/generate_exercises',
-                'create_user': '/api/users',
-                'get_user_sessions': '/api/users/<email>/sessions'
+                'auth': {
+                    'register': '/api/auth/register',
+                    'login': '/api/auth/login',
+                    'me': '/api/auth/me'
+                },
+                'api': {
+                    'summarize': '/api/summarize',
+                    'explain': '/api/explain',
+                    'generate_exercises': '/api/generate_exercises',
+                    'sessions': '/api/sessions',
+                    'collections': '/api/collections'
+                }
             }
         })
     
@@ -78,8 +97,8 @@ def create_app(config_name=None):
     def health():
         return jsonify({
             'status': 'healthy',
-            'service': 'AI Bootcamp Tutor MVP',
-            'version': '1.0.0'
+            'service': 'AI Bootcamp Tutor V2',
+            'version': '2.0.0'
         })
     
     # Database initialization using modern Flask pattern
@@ -120,7 +139,7 @@ def run_app():
         else:
             app.logger.setLevel(logging.INFO)
         
-        logger.info("Starting AI Bootcamp Tutor MVP server...")
+        logger.info("Starting AI Bootcamp Tutor V2 server...")
         logger.info(f"Debug mode: {config.DEBUG}")
         logger.info(f"Database URL: {config.DATABASE_URL[:30]}..." if config.DATABASE_URL else "Not configured")
         

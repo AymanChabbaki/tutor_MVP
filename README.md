@@ -1,439 +1,300 @@
-# AI Bootcamp Tutor MVP Backend
+# AI Bootcamp Tutor V2 🤖📚
 
-A production-ready backend service for an AI-powered educational tutor that helps students understand course content through summarization, explanation, and exercise generation using Google's Gemini AI.
+A comprehensive AI-powered educational platform built with Flask + React, featuring JWT authentication, session management, and collection organization for personalized learning experiences.
 
 ## 🚀 Features
 
-- **Content Summarization**: Generate concise summaries of course content
-- **Multilingual Explanations**: Detailed explanations in both Arabic and English
-- **Exercise Generation**: Automatic creation of educational exercises with questions and answers
-- **User Management**: Track users and their learning sessions
-- **Session History**: Store and retrieve past interactions
-- **Production Ready**: Docker support, proper error handling, and logging
+### 🔐 Authentication System
+- **JWT-based Authentication**: Secure token-based authentication
+- **Password Hashing**: bcrypt encryption for secure password storage
+- **Protected Routes**: Middleware-based route protection
+- **User Registration & Login**: Complete user management system
+
+### 🧠 AI-Powered Learning
+- **Content Summarization**: Generate concise summaries using Google Gemini AI
+- **Intelligent Explanations**: Get detailed explanations in Arabic, English, or both
+- **Exercise Generation**: Create practice exercises from course content
+- **Multi-language Support**: Arabic RTL and English LTR text support
+
+### 📊 Session Management
+- **Persistent Sessions**: Save all AI interactions with full context
+- **Session History**: Track learning progress over time
+- **Session Types**: Categorized by summary, explanation, or exercises
+- **User-specific Sessions**: Each user's data is isolated and secure
+
+### 📁 Collection System
+- **Organize Learning**: Group related sessions into themed collections
+- **Collection Management**: Create, update, delete, and organize collections
+- **Session Assignment**: Add/remove sessions from collections
+- **Learning Paths**: Build structured learning experiences
+
+### 🌐 Modern Frontend
+- **React + Vite**: Fast development and build system
+- **Arabic RTL Support**: Proper bidirectional text rendering
+- **Markdown Rendering**: Beautiful formatting for AI responses
+- **Responsive Design**: Works on desktop and mobile devices
 
 ## 🛠️ Tech Stack
 
-- **Framework**: Flask (Python 3.10+)
-- **Database**: PostgreSQL with Prisma ORM
-- **AI Service**: Google Gemini API
-- **Authentication**: JWT ready (extendable)
-- **Containerization**: Docker & Docker Compose
-- **Architecture**: Clean architecture with separation of concerns
+### Backend
+- **Flask**: Python web framework
+- **PostgreSQL**: Robust relational database
+- **Prisma ORM**: Type-safe database client
+- **JWT**: JSON Web Token authentication
+- **bcrypt**: Password hashing
+- **Google Gemini AI**: Large language model integration
 
-## 📁 Project Structure
+### Frontend
+- **React 18**: Modern UI library
+- **Vite**: Fast build tool
+- **React Markdown**: Markdown rendering
+- **Tajawal Font**: Arabic typography
+- **CSS Modules**: Scoped styling
 
-```
-tutor_MVP/
-├── app.py                  # Flask application entry point
-├── requirements.txt        # Python dependencies
-├── Dockerfile             # Docker configuration
-├── docker-compose.yml     # Multi-service setup
-├── .env.example          # Environment variables template
-├── README.md             # Documentation
-├── config/
-│   ├── __init__.py
-│   └── settings.py       # Application configuration
-├── routes/
-│   ├── __init__.py
-│   └── api.py           # API endpoints
-├── services/
-│   ├── __init__.py
-│   └── gemini_service.py # Gemini AI integration
-├── db/
-│   ├── __init__.py
-│   └── database.py      # Database operations
-└── prisma/
-    └── schema.prisma    # Database schema
-```
+## 📋 Prerequisites
 
-## 🚦 Quick Start
+- **Python 3.10+**
+- **Node.js 18+**
+- **PostgreSQL 12+**
+- **Google Gemini API Key**
 
-### Prerequisites
+## ⚡ Quick Start
 
-- Python 3.10 or higher
-- PostgreSQL 13+ (or use Docker)
-- Google Gemini API key
-- Docker (optional, for containerized deployment)
-
-### 1. Clone and Setup
-
+### 1. Clone & Setup
 ```bash
-# Navigate to your project directory
-cd c:\Users\HP\Desktop\tutor_MVP
+git clone <repository-url>
+cd tutor_MVP
+```
 
-# Create virtual environment
-python -m venv venv
-
-# Activate virtual environment (Windows)
-venv\Scripts\activate
-
-# Install dependencies
+### 2. Backend Setup
+```bash
+# Install Python dependencies
 pip install -r requirements.txt
-```
 
-### 2. Environment Configuration
+# Copy environment configuration
+cp .env.example .env
 
-```bash
-# Copy environment template
-copy .env.example .env
-```
-
-Edit `.env` file with your values:
-
-```env
-# Database Configuration
-DATABASE_URL=postgresql://username:password@localhost:5432/tutor_db
-
-# Gemini AI Configuration
-GEMINI_API_KEY=your_gemini_api_key_here
-
-# Flask Configuration
-FLASK_ENV=development
-FLASK_DEBUG=true
-SECRET_KEY=your-secret-key-change-in-production
+# Edit .env file with your credentials
+# DATABASE_URL=postgresql://username:password@localhost:5432/ai_bootcamp_tutor_v2
+# GEMINI_API_KEY=your_gemini_api_key_here
+# JWT_SECRET=your-super-secret-jwt-key
 ```
 
 ### 3. Database Setup
-
 ```bash
-# Install Prisma CLI
-pip install prisma
-
 # Generate Prisma client
 prisma generate
 
 # Run database migrations
 prisma db push
+
+# (Optional) Seed sample data
+prisma db seed
 ```
 
-### 4. Get Gemini API Key
-
-1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Create a new API key
-3. Add it to your `.env` file
-
-### 5. Run the Application
-
+### 4. Frontend Setup
 ```bash
-# Development mode
+# Navigate to frontend directory
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+### 5. Start Backend
+```bash
+# From project root
 python app.py
-
-# Or using Flask CLI
-flask run
 ```
 
-The API will be available at `http://localhost:5000`
+## 🔑 Environment Variables
 
-## 🐳 Docker Deployment
-
-### Using Docker Compose (Recommended)
-
+### Required Variables
 ```bash
-# Set environment variables
-echo GEMINI_API_KEY=your_api_key_here > .env
-echo SECRET_KEY=your_secret_key_here >> .env
+# Database
+DATABASE_URL=postgresql://username:password@localhost:5432/ai_bootcamp_tutor_v2
 
-# Start all services
-docker-compose up -d
+# AI Service
+GEMINI_API_KEY=your_gemini_api_key_here
 
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
+# Authentication
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+SECRET_KEY=your-flask-secret-key-change-in-production
 ```
 
-### Manual Docker Build
-
+### Optional Variables
 ```bash
-# Build image
-docker build -t tutor-backend .
+# JWT Configuration
+JWT_ALGORITHM=HS256
+JWT_EXPIRATION_HOURS=24
 
-# Run container
-docker run -p 5000:5000 --env-file .env tutor-backend
+# Security
+BCRYPT_ROUNDS=12
+
+# Application Limits
+MAX_SESSIONS_PER_USER=100
+MAX_COLLECTIONS_PER_USER=50
+MAX_SESSIONS_PER_COLLECTION=1000
+
+# Development
+DEBUG=True
+FLASK_ENV=development
+LOG_LEVEL=INFO
 ```
 
-## 📋 API Endpoints
+## 🔌 API Endpoints
 
-### Health Check
-```http
-GET /health
+### Authentication
+```
+POST /auth/register    - User registration
+POST /auth/login       - User login  
+GET  /auth/me          - Get current user info
 ```
 
-### Content Summarization
-```http
-POST /api/summarize
-Content-Type: application/json
-
-{
-  "text": "Course content to summarize",
-  "user_id": 1  // optional
-}
+### AI Services (Optional Auth)
+```
+POST /api/summarize       - Generate content summary
+POST /api/explain         - Generate explanations
+POST /api/generate_exercises - Create practice exercises
 ```
 
-**Response:**
-```json
-{
-  "summary": "Generated summary of the content",
-  "session_id": 123  // if user_id provided
-}
+### Session Management (Protected)
+```
+GET    /api/sessions           - List user sessions
+DELETE /api/sessions/{id}      - Delete session
 ```
 
-### Content Explanation
-```http
-POST /api/explain
-Content-Type: application/json
+### Collections (Protected)  
+```
+GET    /api/collections        - List user collections
+POST   /api/collections        - Create collection
+PUT    /api/collections/{id}   - Update collection
+DELETE /api/collections/{id}   - Delete collection
 
-{
-  "text": "Course content to explain",
-  "user_id": 1  // optional
-}
+POST   /api/collections/{id}/sessions/{sid} - Add session to collection
+DELETE /api/collections/{id}/sessions/{sid} - Remove session from collection
 ```
 
-**Response:**
-```json
-{
-  "arabic_explanation": "Detailed explanation in Arabic",
-  "english_explanation": "Detailed explanation in English",
-  "session_id": 123  // if user_id provided
-}
+### Utility
+```
+GET /api/health    - Service health check
+GET /health        - Root health check  
+GET /              - API documentation
 ```
 
-### Exercise Generation
-```http
-POST /api/generate_exercises
-Content-Type: application/json
+## 📊 Database Schema
 
-{
-  "text": "Course content for exercises",
-  "user_id": 1  // optional
-}
-```
+### Users
+- `id`: Primary key
+- `email`: Unique email address
+- `name`: User display name
+- `password`: bcrypt hashed password
+- `languagePref`: Preferred language (en/ar)
+- `createdAt`: Registration timestamp
 
-**Response:**
-```json
-{
-  "exercises": [
-    {
-      "question": "What is the main concept?",
-      "answer": "The main concept is..."
-    },
-    {
-      "question": "How does this work?",
-      "answer": "It works by..."
-    },
-    {
-      "question": "What are the benefits?",
-      "answer": "The benefits include..."
-    }
-  ],
-  "session_id": 123  // if user_id provided
-}
-```
+### Sessions
+- `id`: Primary key
+- `userId`: Foreign key to Users
+- `collectionId`: Optional foreign key to Collections
+- `inputText`: Original user input
+- `outputSummary`: AI-generated summary
+- `outputExplanation`: AI-generated explanation
+- `outputExercises`: AI-generated exercises (JSON)
+- `sessionType`: Type of session (summary/explanation/exercises)
+- `createdAt`: Session creation timestamp
 
-### User Management
-```http
-POST /api/users
-Content-Type: application/json
+### Collections
+- `id`: Primary key
+- `userId`: Foreign key to Users
+- `name`: Collection name
+- `description`: Optional description
+- `createdAt`: Collection creation timestamp
 
-{
-  "name": "Student Name",
-  "email": "student@example.com",
-  "language_pref": "english"  // optional
-}
-```
+## 🔒 Security Features
 
-### Get User Sessions
-```http
-GET /api/users/{email}/sessions?limit=10
-```
+- **Password Hashing**: bcrypt with configurable rounds
+- **JWT Tokens**: Secure session management
+- **CORS Protection**: Configurable allowed origins
+- **Input Validation**: Comprehensive request validation
+- **SQL Injection Prevention**: Prisma ORM protection
+- **Rate Limiting**: Protection against abuse
+- **Error Handling**: Secure error responses
 
-## 🗄️ Database Schema
+## 🌍 Multi-language Support
 
-### Users Table
-```sql
-CREATE TABLE users (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR NOT NULL,
-  email VARCHAR UNIQUE NOT NULL,
-  language_pref VARCHAR NOT NULL,
-  created_at TIMESTAMP DEFAULT NOW()
-);
-```
+### Arabic Support
+- **RTL Text Direction**: Automatic detection and rendering
+- **Arabic Typography**: Tajawal font for beautiful Arabic text
+- **Bidirectional Text**: Mixed Arabic/English content support
 
-### Sessions Table
-```sql
-CREATE TABLE sessions (
-  id SERIAL PRIMARY KEY,
-  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-  input_text TEXT NOT NULL,
-  output_summary TEXT,
-  output_explanation TEXT,
-  output_exercises JSONB,
-  created_at TIMESTAMP DEFAULT NOW()
-);
-```
-
-## 🔧 Configuration
-
-### Environment Variables
-
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `DATABASE_URL` | PostgreSQL connection string | - | ✅ |
-| `GEMINI_API_KEY` | Google Gemini API key | - | ✅ |
-| `FLASK_ENV` | Flask environment | `development` | ❌ |
-| `FLASK_DEBUG` | Enable debug mode | `false` | ❌ |
-| `SECRET_KEY` | Flask secret key | - | ✅ (production) |
-| `PORT` | Server port | `5000` | ❌ |
-| `GEMINI_MODEL` | Gemini model name | `gemini-1.5-flash` | ❌ |
-| `MAX_TOKENS` | Max response tokens | `1000` | ❌ |
-| `TEMPERATURE` | AI creativity level | `0.7` | ❌ |
-| `CORS_ORIGINS` | Allowed CORS origins | `*` | ❌ |
-
-### Gemini AI Models
-
-Supported models:
-- `gemini-1.5-flash` (recommended for speed)
-- `gemini-1.5-pro` (for complex tasks)
-- `gemini-pro` (legacy)
+### Language Options
+- **Arabic**: Full RTL support with proper typography
+- **English**: Standard LTR support
+- **Both**: Side-by-side bilingual responses
 
 ## 🧪 Testing
 
 ```bash
-# Install test dependencies
-pip install pytest pytest-asyncio pytest-mock
+# Run backend tests
+python -m pytest tests/
 
-# Run tests
-pytest
+# Run frontend tests
+cd frontend
+npm test
 
-# Run with coverage
-pytest --cov=.
-
-# Run specific test file
-pytest tests/test_api.py
+# Run integration tests
+npm run test:integration
 ```
 
-## 📊 Logging
+## 📦 Production Deployment
 
-The application uses structured logging:
-
-- **Console**: Real-time logs during development
-- **File**: `app.log` for persistent logging
-- **Levels**: DEBUG, INFO, WARNING, ERROR, CRITICAL
-
-Configure log level via `LOG_LEVEL` environment variable.
-
-## 🚀 Production Deployment
-
-### 1. Environment Setup
+### Environment Setup
 ```bash
-# Production environment
-FLASK_ENV=production
-FLASK_DEBUG=false
-SECRET_KEY=strong-secret-key-here
-DATABASE_URL=postgresql://user:pass@prod-db:5432/tutor_db
+# Set production environment variables
+export FLASK_ENV=production
+export DEBUG=False
+export JWT_SECRET=your-production-jwt-secret
+export SECRET_KEY=your-production-secret-key
 ```
 
-### 2. Database Migration
+### Database Migration
 ```bash
-# Run migrations
-prisma db push
-
-# Verify connection
-prisma db pull
+# Run production migrations
+prisma migrate deploy
 ```
 
-### 3. Performance Tuning
-- Use `gunicorn` with multiple workers
-- Enable database connection pooling
-- Configure proper CORS origins
-- Set up monitoring and alerting
-
-### 4. Security Checklist
-- [ ] Strong SECRET_KEY set
-- [ ] Database credentials secured
-- [ ] CORS properly configured
-- [ ] API rate limiting (implement if needed)
-- [ ] Input validation enabled
-- [ ] Logs don't contain sensitive data
-
-## 🔍 Troubleshooting
-
-### Common Issues
-
-1. **Database Connection Failed**
-   ```bash
-   # Check PostgreSQL status
-   pg_isready -h localhost -p 5432
-   
-   # Verify credentials
-   psql -h localhost -U username -d database_name
-   ```
-
-2. **Gemini API Error**
-   ```bash
-   # Test API key
-   curl -H "Authorization: Bearer YOUR_API_KEY" \
-        "https://generativelanguage.googleapis.com/v1/models"
-   ```
-
-3. **Import Errors**
-   ```bash
-   # Regenerate Prisma client
-   prisma generate
-   
-   # Check Python path
-   python -c "import sys; print(sys.path)"
-   ```
-
-4. **Port Already in Use**
-   ```bash
-   # Windows: Find and kill process
-   netstat -ano | findstr :5000
-   taskkill /PID <PID> /F
-   
-   # Or use different port
-   set PORT=8000
-   python app.py
-   ```
-
-## 📈 Performance Tips
-
-1. **Database Optimization**
-   - Add indexes on frequently queried columns
-   - Use connection pooling
-   - Implement query pagination
-
-2. **API Response Time**
-   - Cache Gemini responses for similar content
-   - Implement request queuing for high load
-   - Use async processing where possible
-
-3. **Memory Management**
-   - Monitor memory usage with large text inputs
-   - Implement input size limits
-   - Use streaming for large responses
+### Build Frontend
+```bash
+cd frontend
+npm run build
+```
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'Add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
 
-## 📄 License
+## 📝 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Google Gemini AI**: Powering the intelligent features
+- **Prisma**: Excellent database toolkit
+- **React Community**: Amazing ecosystem and tools
+- **Flask Community**: Solid Python web framework
 
 ## 📞 Support
 
-For issues and questions:
-1. Check the troubleshooting section
-2. Review logs in `app.log`
-3. Create an issue with detailed error information
+For support, email [your-email] or create an issue in the repository.
 
 ---
 
-**Built with ❤️ for educational excellence**
+**AI Bootcamp Tutor V2** - Empowering education through intelligent technology 🚀

@@ -1,0 +1,56 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-py"
+  recursive_type_depth = 5
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int          @id @default(autoincrement())
+  name         String
+  email        String       @unique
+  password     String
+  languagePref String       @default("english")
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  sessions     Session[]
+  collections  Collection[]
+
+  @@map("users")
+}
+
+model Session {
+  id                Int         @id @default(autoincrement())
+  userId            Int
+  inputText         String
+  outputSummary     String?
+  outputExplanation Json?
+  outputExercises   Json?
+  sessionType       String      // 'summary', 'explanation', 'exercises'
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collectionId      Int?
+  collection        Collection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+
+  @@map("sessions")
+}
+
+model Collection {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  title       String
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions    Session[]
+
+  @@map("collections")
+}

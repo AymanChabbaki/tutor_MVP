@@ -307,105 +307,102 @@ The AI service is currently experiencing high demand and is temporarily overload
             logger.error(f"Failed to summarize content: {e}")
             raise
     
-    async def explain_content(self, text: str) -> Tuple[str, str]:
+    async def explain_content(self, text: str, language_preference: str = 'english') -> str:
         """
-        Generate detailed explanations in both Arabic and English.
+        Generate detailed explanations based on language preference.
         
         Args:
             text: The course content to explain
+            language_preference: Language for the explanation ('english' or 'arabic')
             
         Returns:
-            Tuple[str, str]: (arabic_explanation, english_explanation)
+            str: Explanation in the requested language
         """
         if not text or not text.strip():
             raise ValueError("Input text cannot be empty")
         
-        # Arabic explanation prompt
-        arabic_prompt = f"""
-        اشرح المحتوى التعليمي التالي بالعربية بطريقة شاملة ومفصلة.
+        if language_preference.lower() == 'arabic':
+            # Arabic explanation prompt
+            prompt = f"""
+            اشرح المحتوى التعليمي التالي بالعربية بطريقة شاملة ومفصلة.
+            
+            المطلوب في الشرح:
+            • شرح واضح ومفصل باستخدام لغة بسيطة ومفهومة
+            • تقسيم المفاهيم المعقدة إلى أجزاء سهلة الفهم
+            • إدراج أمثلة عملية وتطبيقية من الحياة اليومية
+            • استخدام التنسيق المهني لسهولة القراءة
+            • توضيح الصيغ أو النظريات المهمة مع شرحها
+            • ربط المفاهيم ببعضها البعض
+            
+            المحتوى التعليمي:
+            {text}
+            
+            الشرح التفصيلي بالعربية:
+            
+            ## نظرة عامة
+            [مقدمة موجزة عن الموضوع]
+            
+            ## المفاهيم الأساسية
+            [شرح المفاهيم الرئيسية بالتفصيل]
+            
+            ## أمثلة عملية
+            [أمثلة واضحة من الحياة اليومية]
+            
+            ## الروابط والعلاقات
+            [كيف ترتبط هذه المفاهيم مع بعضها]
+            
+            ## نصائح للفهم والحفظ
+            [استراتيجيات لفهم وتذكر المعلومات]
+            
+            الشرح:
+            """
+        else:
+            # English explanation prompt
+            prompt = f"""
+            Provide a comprehensive and detailed explanation of the following educational content.
+            
+            EXPLANATION REQUIREMENTS:
+            • Clear and detailed explanation using simple, understandable language
+            • Break down complex concepts into easily digestible parts
+            • Include practical examples from everyday life and real-world applications
+            • Use professional formatting for better readability
+            • Explain important formulas or theories with context
+            • Show connections between different concepts
+            • Provide memory aids and learning tips
+            
+            EDUCATIONAL CONTENT:
+            {text}
+            
+            DETAILED EXPLANATION:
+            
+            ## Overview
+            [Brief introduction to the topic]
+            
+            ## Core Concepts
+            [Detailed explanation of main concepts]
         
-        المطلوب في الشرح:
-        • شرح واضح ومفصل باستخدام لغة بسيطة ومفهومة
-        • تقسيم المفاهيم المعقدة إلى أجزاء سهلة الفهم
-        • إدراج أمثلة عملية وتطبيقية من الحياة اليومية
-        • استخدام التنسيق المهني لسهولة القراءة
-        • توضيح الصيغ أو النظريات المهمة مع شرحها
-        • ربط المفاهيم ببعضها البعض
-        
-        المحتوى التعليمي:
-        {text}
-        
-        الشرح التفصيلي بالعربية:
-        
-        ## نظرة عامة
-        [مقدمة موجزة عن الموضوع]
-        
-        ## المفاهيم الأساسية
-        [شرح المفاهيم الرئيسية بالتفصيل]
-        
-        ## أمثلة عملية
-        [أمثلة واضحة من الحياة اليومية]
-        
-        ## الروابط والعلاقات
-        [كيف ترتبط هذه المفاهيم مع بعضها]
-        
-        ## نصائح للفهم والحفظ
-        [استراتيجيات لفهم وتذكر المعلومات]
-        
-        الشرح:
-        """
-        
-        # English explanation prompt
-        english_prompt = f"""
-        Provide a comprehensive and detailed explanation of the following educational content.
-        
-        EXPLANATION REQUIREMENTS:
-        • Clear and detailed explanation using simple, understandable language
-        • Break down complex concepts into easily digestible parts
-        • Include practical examples from everyday life and real-world applications
-        • Use professional formatting for better readability
-        • Explain important formulas or theories with context
-        • Show connections between different concepts
-        • Provide memory aids and learning tips
-        
-        EDUCATIONAL CONTENT:
-        {text}
-        
-        DETAILED EXPLANATION:
-        
-        ## Overview
-        [Brief introduction to the topic]
-        
-        ## Core Concepts
-        [Detailed explanation of main concepts]
-        
-        ## Practical Examples
-        [Clear examples from everyday life]
-        
-        ## Connections & Relationships
-        [How these concepts relate to each other]
-        
-        ## Learning Tips & Memory Aids
-        [Strategies for understanding and remembering]
-        
-        ## Practice Applications
-        [How to apply this knowledge]
-        
-        Explanation:
-        """
+            
+            ## Practical Examples
+            [Clear examples from everyday life]
+            
+            ## Connections & Relationships
+            [How these concepts relate to each other]
+            
+            ## Learning Tips & Memory Aids
+            [Strategies for understanding and remembering]
+            
+            ## Practice Applications
+            [How to apply this knowledge]
+            
+            Explanation:
+            """
         
         try:
-            # Generate both explanations concurrently
-            arabic_task = self._generate_content(arabic_prompt)
-            english_task = self._generate_content(english_prompt)
+            # Generate explanation in the requested language
+            explanation = await self._generate_content(prompt)
             
-            arabic_explanation, english_explanation = await asyncio.gather(
-                arabic_task, 
-                english_task
-            )
-            
-            logger.info("Content explained in both languages successfully")
-            return arabic_explanation, english_explanation
+            logger.info(f"Content explained in {language_preference} successfully")
+            return explanation
             
         except Exception as e:
             logger.error(f"Failed to explain content: {e}")
@@ -438,54 +435,40 @@ The AI service is currently experiencing high demand and is temporarily overload
         {language_instruction}
         The exercises should cover different skill levels and question types.
         
+        IMPORTANT: You must format each exercise EXACTLY as shown below, with clear separators:
+        
+        === EXERCISE 1 ===
+        Question: [Write a clear, specific question here]
+        Answer: [Provide a detailed answer with explanations]
+        
+        === EXERCISE 2 ===
+        Question: [Write a clear, specific question here]
+        Answer: [Provide a detailed answer with explanations]
+        
+        === EXERCISE 3 ===
+        Question: [Write a clear, specific question here]
+        Answer: [Provide a detailed answer with explanations]
+        
+        === EXERCISE 4 ===
+        Question: [Write a clear, specific question here]
+        Answer: [Provide a detailed answer with explanations]
+        
+        === EXERCISE 5 ===
+        Question: [Write a clear, specific question here]
+        Answer: [Provide a detailed answer with explanations]
+        
         EXERCISE REQUIREMENTS:
         • Include variety: multiple choice, short answer, problem-solving, application questions
         • Progress from basic understanding to advanced application
         • Provide detailed, educational answers with explanations
         • Include step-by-step solutions where appropriate
         • Add learning tips and common mistakes to avoid
-        • Use clear numbering and formatting
+        • Make questions specific and clear, not generic
         
         COURSE CONTENT:
         {text}
         
-        STRUCTURED EXERCISES:
-        
-        Exercise 1: Basic Understanding
-        Type: [Multiple Choice/Short Answer/Fill in the blank]
-        Question: [Clear, direct question testing fundamental concepts]
-        A) [Option A - if multiple choice]
-        B) [Option B - if multiple choice]
-        C) [Option C - if multiple choice]
-        D) [Option D - if multiple choice]
-        Answer: [Correct answer with detailed explanation]
-        Why: [Explanation of the concept and why other options are wrong]
-        
-        Exercise 2: Concept Application
-        Type: [Problem Solving/Analysis]
-        Question: [Question requiring application of concepts]
-        Answer: [Step-by-step solution with explanations]
-        Key Points: [Important concepts demonstrated]
-        
-        Exercise 3: Critical Thinking
-        Type: [Analysis/Comparison/Evaluation]
-        Question: [Question requiring deeper analysis]
-        Answer: [Comprehensive answer with reasoning]
-        Tips: [Learning strategies and insights]
-        
-        Exercise 4: Real-World Application
-        Type: [Practical Application]
-        Question: [Question connecting theory to real-world scenarios]
-        Answer: [Practical solution with context]
-        Connection: [How this relates to real-life situations]
-        
-        Exercise 5: Advanced Challenge
-        Type: [Synthesis/Problem Solving]
-        Question: [Complex question combining multiple concepts]
-        Answer: [Detailed solution with multiple steps]
-        Common Mistakes: [What students often get wrong and how to avoid it]
-        
-        Exercises:
+        Generate the exercises now:
         """
         
         try:
@@ -515,38 +498,24 @@ The AI service is currently experiencing high demand and is temporarily overload
         import re
         exercises = []
         
-        # Try to split by Exercise headers
-        exercise_pattern = r'Exercise \d+:'
+        # Try to split by the new format first
+        exercise_pattern = r'=== EXERCISE \d+ ==='
         exercise_blocks = re.split(exercise_pattern, exercises_text)[1:]  # Skip first empty part
         
         for i, block in enumerate(exercise_blocks, 1):
             try:
-                # Look for Question and Answer patterns
+                # Look for Question and Answer patterns in the new format
                 question_match = re.search(r'Question:\s*(.*?)(?=Answer:|$)', block, re.DOTALL)
-                answer_match = re.search(r'Answer:\s*(.*?)(?=Exercise \d+:|$)', block, re.DOTALL)
+                answer_match = re.search(r'Answer:\s*(.*?)(?=\n*$)', block, re.DOTALL)
                 
-                if question_match:
+                if question_match and answer_match:
                     question = question_match.group(1).strip()
-                    # Clean up question formatting
-                    question = re.sub(r'\n+', '\n', question)
-                    question = re.sub(r'^\s*Type:.*?\n', '', question, flags=re.MULTILINE)
-                    question = question.strip()
-                else:
-                    # Fallback: use first few lines as question
-                    lines = [line.strip() for line in block.split('\n') if line.strip()]
-                    question = '\n'.join(lines[:3]) if lines else f"Exercise {i} - Please review the content"
-                
-                if answer_match:
                     answer = answer_match.group(1).strip()
-                    # Clean up answer formatting
-                    answer = re.sub(r'\n+', '\n', answer)
-                    answer = answer.strip()
-                else:
-                    # Fallback: use remaining content as answer
-                    lines = [line.strip() for line in block.split('\n') if line.strip()]
-                    answer = '\n'.join(lines[3:]) if len(lines) > 3 else "Please refer to the course material for the answer."
-                
-                if question and answer:
+                    
+                    # Clean up formatting
+                    question = re.sub(r'\n+', ' ', question).strip()
+                    answer = re.sub(r'\n+', '\n', answer).strip()
+                    
                     exercises.append({
                         "question": question,
                         "answer": answer,
@@ -558,18 +527,102 @@ The AI service is currently experiencing high demand and is temporarily overload
                 logger.warning(f"Failed to parse exercise {i}: {e}")
                 continue
         
-        # Enhanced fallback: create structured exercises from raw text
-        if not exercises and exercises_text:
-            # Split text into chunks and create exercises
-            chunks = self._split_into_chunks(exercises_text, 3)
-            for i, chunk in enumerate(chunks, 1):
-                if len(chunk.strip()) > 20:  # Only if chunk has substantial content
-                    exercises.append({
-                        "question": f"Exercise {i}: Analyze and explain the following concept",
-                        "answer": chunk.strip(),
-                        "type": f"Exercise {i}",
+        # Fallback: try old Exercise pattern
+        if not exercises:
+            exercise_pattern = r'Exercise \d+:'
+            exercise_blocks = re.split(exercise_pattern, exercises_text)[1:]  # Skip first empty part
+            
+            for i, block in enumerate(exercise_blocks, 1):
+                try:
+                    # Look for Question and Answer patterns
+                    question_match = re.search(r'Question:\s*(.*?)(?=Answer:|$)', block, re.DOTALL)
+                    answer_match = re.search(r'Answer:\s*(.*?)(?=Exercise \d+:|$)', block, re.DOTALL)
+                    
+                    if question_match:
+                        question = question_match.group(1).strip()
+                        # Clean up question formatting
+                        question = re.sub(r'\n+', ' ', question)
+                        question = re.sub(r'^\s*Type:.*?\n', '', question, flags=re.MULTILINE)
+                        question = question.strip()
+                    else:
+                        # Fallback: use first few lines as question
+                        lines = [line.strip() for line in block.split('\n') if line.strip()]
+                        question = ' '.join(lines[:2]) if lines else f"Exercise {i} - Please review the content"
+                    
+                    if answer_match:
+                        answer = answer_match.group(1).strip()
+                        # Clean up answer formatting
+                        answer = re.sub(r'\n+', '\n', answer)
+                        answer = answer.strip()
+                    else:
+                        # Fallback: use remaining content as answer
+                        lines = [line.strip() for line in block.split('\n') if line.strip()]
+                        answer = '\n'.join(lines[2:]) if len(lines) > 2 else "Please refer to the course material for the answer."
+                    
+                    if question and answer and len(question) > 10:
+                        exercises.append({
+                            "question": question,
+                            "answer": answer,
+                            "type": f"Exercise {i}",
+                            "difficulty": self._determine_difficulty(i)
+                        })
+                        
+                except Exception as e:
+                    logger.warning(f"Failed to parse exercise {i}: {e}")
+                    continue
+        
+        # Enhanced fallback: only if no exercises were parsed at all
+        if not exercises and exercises_text and len(exercises_text.strip()) > 50:
+            logger.warning("Failed to parse exercises, creating fallback exercises")
+            # Try to extract any questions from the raw text
+            question_patterns = [
+                r'Question:\s*(.*?)(?=Answer:|$)',
+                r'\?\s*\n',  # Look for question marks
+                r'قارن|اشرح|ما هو|كيف|لماذا',  # Arabic question words
+                r'Compare|Explain|What is|How|Why'  # English question words
+            ]
+            
+            # Split text into sentences and look for questions
+            sentences = re.split(r'[.!?]\s+', exercises_text)
+            potential_exercises = []
+            
+            for sentence in sentences:
+                if len(sentence.strip()) > 20:
+                    # Check if this looks like a question
+                    is_question = (
+                        '?' in sentence or 
+                        any(re.search(pattern, sentence, re.IGNORECASE) for pattern in question_patterns)
+                    )
+                    
+                    if is_question:
+                        # This sentence might be a question, try to find its answer
+                        question = sentence.strip()
+                        # Look for content after this sentence as potential answer
+                        remaining_text = exercises_text[exercises_text.find(sentence) + len(sentence):].strip()
+                        answer_part = remaining_text.split('.')[0:3]  # Take next 3 sentences
+                        answer = '. '.join(answer_part).strip()
+                        
+                        if len(answer) > 20:
+                            potential_exercises.append({
+                                "question": question,
+                                "answer": answer,
+                                "type": f"Exercise {len(potential_exercises) + 1}",
+                                "difficulty": "Medium"
+                            })
+            
+            # If we found potential exercises, use them
+            if potential_exercises:
+                exercises = potential_exercises[:3]
+            else:
+                # Last resort: create a single generic exercise
+                exercises = [
+                    {
+                        "question": "Based on the provided content, analyze and explain the key concepts presented.",
+                        "answer": exercises_text.strip()[:500] + "..." if len(exercises_text) > 500 else exercises_text.strip(),
+                        "type": "Exercise 1",
                         "difficulty": "Medium"
-                    })
+                    }
+                ]
         
         # Ensure we have at least 1 exercise
         if not exercises:

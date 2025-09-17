@@ -1,5 +1,9 @@
 @echo off
-REM AI Bootcamp Tutor MVP - Windows Setup Script
+REM AI Boo# Install depend# Generate Prisma client
+echo 🗄️ Setting up database client...
+cd backend && prisma generate && cd ..ies
+echo 📥 Installing dependencies...
+pip install -r backend/requirements.txtmp Tutor MVP - Windows Setup Script
 
 echo 🚀 Setting up AI Bootcamp Tutor MVP...
 
@@ -40,10 +44,10 @@ prisma generate
 echo ✅ Setup complete!
 echo.
 echo Next steps:
-echo 1. Edit .env file with your database URL and Gemini API key
+echo 1. Edit backend/.env file with your database URL and Gemini API key
 echo 2. Start PostgreSQL database
-echo 3. Run: prisma db push
-echo 4. Run: python app.py
+echo 3. Run: cd backend && prisma db push
+echo 4. Run: cd backend && python app.py
 echo.
 echo 🌟 Your AI Tutor backend will be running at http://localhost:5000
 
